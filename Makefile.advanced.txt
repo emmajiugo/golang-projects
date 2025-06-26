@@ -1,0 +1,80 @@
+
+# Makefile for Go Project
+
+# Variables
+BINARY_NAME=go-server
+MAIN_FILE=main.go
+
+# Declare phony targets (targets that don't create files)
+.PHONY: build run start clean test fmt vet help
+
+# Default target when just running 'make'
+.DEFAULT_GOAL := help
+
+# Build the Go binary
+build:
+	@echo "Building $(BINARY_NAME)..."
+	go build -o $(BINARY_NAME) $(MAIN_FILE)
+	@echo "Build complete!"
+
+# Run the server directly with go run (no build needed)
+run:
+	@echo "Running Go server..."
+	go run $(MAIN_FILE)
+
+# Build and then run the binary
+start: build
+	@echo "Starting $(BINARY_NAME)..."
+	./$(BINARY_NAME)
+
+# Clean up built binaries
+clean:
+	@echo "Cleaning up..."
+	go clean
+	rm -f $(BINARY_NAME)
+
+# Run tests
+test:
+	@echo "Running tests..."
+	go test ./...
+
+# Format code
+fmt:
+	@echo "Formatting code..."
+	go fmt ./...
+
+# Run go vet for static analysis
+vet:
+	@echo "Running go vet..."
+	go vet ./...
+
+# Install dependencies
+deps:
+	@echo "Installing dependencies..."
+	go mod download
+	go mod tidy
+
+# Build for multiple platforms
+build-all:
+	@echo "Building for multiple platforms..."
+	GOOS=linux GOARCH=amd64 go build -o $(BINARY_NAME)-linux-amd64 $(MAIN_FILE)
+	GOOS=windows GOARCH=amd64 go build -o $(BINARY_NAME)-windows-amd64.exe $(MAIN_FILE)
+	GOOS=darwin GOARCH=amd64 go build -o $(BINARY_NAME)-darwin-amd64 $(MAIN_FILE)
+
+# Development workflow: format, vet, test, then build
+dev: fmt vet test build
+
+# Show help
+help:
+	@echo "Available targets:"
+	@echo "  build     - Build the Go binary"
+	@echo "  run       - Run the server with 'go run'"
+	@echo "  start     - Build and run the binary"
+	@echo "  clean     - Remove built binaries"
+	@echo "  test      - Run tests"
+	@echo "  fmt       - Format code"
+	@echo "  vet       - Run go vet"
+	@echo "  deps      - Install/update dependencies"
+	@echo "  build-all - Build for multiple platforms"
+	@echo "  dev       - Run full development workflow"
+	@echo "  help      - Show this help message"
